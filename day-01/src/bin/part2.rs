@@ -14,10 +14,9 @@ fn part1(input: &str) -> String {
 			("five", 5), ("six", 6), ("seven", 7), ("eight", 8), ("nine", 9)
 		].iter().cloned().collect();
 
-	let dictref = &dict;
     for line in input.lines(){
 		'front: for i in 0..line.len(){
-			for (&num, &j) in dictref{
+			for (&num, &j) in &dict{
 				if line[i..].starts_with(num){
 					catenator.push(char::from_digit(j, 10).unwrap());
 					break 'front;
@@ -28,7 +27,7 @@ fn part1(input: &str) -> String {
 			}
 		}
 		'back: for i in (0..line.len()).rev(){
-			for (&num, &j) in dictref{
+			for (&num, &j) in &dict{
 				println!("{} {}", line[..i + 1].to_string(), num);
 				if line[..i + 1].ends_with(num){
 					catenator.push(char::from_digit(j, 10).unwrap());
