@@ -28,7 +28,6 @@ fn part1(input: &str) -> String {
 		}
 		'back: for i in (0..line.len()).rev(){
 			for (&num, &j) in &dict{
-				println!("{} {}", line[..i + 1].to_string(), num);
 				if line[..i + 1].ends_with(num){
 					catenator.push(char::from_digit(j, 10).unwrap());
 					break 'back;
