@@ -2,11 +2,11 @@ use std::collections::HashMap;
 
 fn main() {
     let input = include_str!("./input.txt");
-    let output = part1(input);
+    let output = part2(input);
     dbg!(output);
 }
 
-fn part1(input: &str) -> String {
+fn part2(input: &str) -> String {
     let mut collator = 0;
     let mut catenator: String = "".to_string();
 	let dict: HashMap<&str, u32> =
@@ -51,7 +51,7 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let result = part1(include_str!("./input.txt"));
+        let result = part2(include_str!("./input.txt"));
         assert_eq!(result, "55358");
     }
 }
