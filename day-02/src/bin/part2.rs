@@ -30,7 +30,7 @@ fn parse_line(line: &str) -> Game {
         let mut set = Set {r:0, g:0, b:0};
         for color in set_input.split(',') {
             let splitted_col:Vec<&str> = color.split(' ').collect();
-            if splitted_col[2].eq("red") {
+            if splitted_col[2].eq("red") {							//splitted_col[0] is an empty cell? Alright...
                 set.r = splitted_col[1].parse::<u32>().unwrap();
             }
             else if splitted_col[2].eq("green") {
