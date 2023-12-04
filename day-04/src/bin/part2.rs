@@ -2,11 +2,14 @@ use std::collections::VecDeque;
 
 fn main() {
     let input = include_str!("./input.txt");
-    let output = part1(input);
+    let output = part2(input);
     dbg!(output);
 }
 
-fn part1(input: &str) -> String {
+// Working but not very optimized implementation.
+// 1. Parsing should not be done every time a card is processed
+// 2. get_matches should be limited to be done only once for each card 
+fn part2(input: &str) -> String {
 	let mut collator = 0;
 
 	let mut queue: VecDeque<&str> = VecDeque::new();
