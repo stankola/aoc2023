@@ -35,7 +35,7 @@ fn parse_ranges(input: &str) -> (Range<u64>, Range<u64>) {
 
 // There's probably a way to make this generic
 fn range_contains_range(a: &Range<u64>, b: &Range<u64>) -> bool {
-    return a.start >= b.start && a.end <= b.end
+    return a.start <= b.start && a.end >= b.end
 }
 
 fn part2(input: &str) -> String {
@@ -58,62 +58,61 @@ fn part2(input: &str) -> String {
     }
     let mut lowest_loc = u64::MAX;
     for seed_range in seeds {
-        println!("processing range {}-{}: {} values", seed_range.start, seed_range.end, seed_range.end - seed_range.start);
+//        println!("processing range {}-{}: {} values", seed_range.start, seed_range.end, seed_range.end - seed_range.start);
         let mut seed_start_ranges:VecDeque<Range<u64>> = VecDeque::new();
         let mut seed_target_ranges:VecDeque<Range<u64>> = VecDeque::new();
         seed_start_ranges.push_back(seed_range);
 
         for map in &maps {
-            println!("seed_start_ranges @ loopstart {:?}", seed_start_ranges);
+//            println!("seed_start_ranges @ loopstart {:?}", seed_start_ranges);
             while !seed_start_ranges.is_empty() {
                 let mut seed_start_range = seed_start_ranges.pop_front().unwrap();
-                println!("processing queue {}-{}: {} values", seed_start_range.start, seed_start_range.end, seed_start_range.end - seed_start_range.start);
+//                println!("processing queue {}-{}: {} values", seed_start_range.start, seed_start_range.end, seed_start_range.end - seed_start_range.start);
                 for ranges in map {
-                    println!("Ranges {}-{} fits in {}-{}", seed_start_range.start, seed_start_range.end, ranges.0.start, ranges.0.end);
-                    if ranges.0.contains(&seed_start_range.start) { // TODO other cases: ranges.0.contains(&seed_start_range.end) AND seed_start_range.contains(ranges.0)
-                        if ranges.0.contains(&seed_start_range.end) {
-                            println!("Perfectly");
-                            let target_ranges: &mut VecDeque<Range<u64>> = &mut seed_target_ranges;
-                            // range fits completely. Push target range and move to next start range
+//                    println!("Ranges {}-{} fits in {}-{}", seed_start_range.start, seed_start_range.end, ranges.0.start, ranges.0.end);
+                    if ranges.0.contains(&seed_start_range.start) {
+                        if ranges.0.contains(&(seed_start_range.end - 1)) {
+//                            println!("Perfectly");
                             let len = seed_start_range.end - seed_start_range.start;
                             let offset = seed_start_range.start - ranges.0.start;
-                            target_ranges.push_back(Range{ start: ranges.1.start + offset,
+                            seed_target_ranges.push_back(Range{ start: ranges.1.start + offset,
                                                                 end: ranges.1.start + offset + len});
                             seed_start_range.start = 0;
                             seed_start_range.end = 0;
                             break;
                         }
                         else {
-                            // range fits partially. Push fitting range and shorten start range
-                            // TODO index check. Done.
-                            println!("Not so perfectly");
-                            let target_ranges: &mut VecDeque<Range<u64>> = &mut seed_target_ranges;
-                            let len = ranges.0.end - seed_start_range.start - 1;
+//                            println!("Range start fits, end does not");
+                            let len = ranges.0.end - seed_start_range.start;
                             let offset = seed_start_range.start - ranges.0.start;
-                            target_ranges.push_back(Range{start: ranges.1.start + offset,
+                            seed_target_ranges.push_back(Range{start: ranges.1.start + offset,
                                 end: ranges.1.start + offset + len});
                             seed_start_range.start = seed_start_range.start + len;
                         }
                     }
-                    else if ranges.0.contains(&seed_start_range.end){
-                        // TODO
+                    else if ranges.0.contains(&(seed_start_range.end - 1)){
+//                        println!("Range end fits, start does not");
+                        let len = seed_start_range.end - ranges.0.start;
+                        seed_target_ranges.push_back(Range{start: ranges.1.start,
+                            end: ranges.1.start + len});
+                        seed_start_range.end = seed_start_range.end - len;
                     }
                     else if range_contains_range(&seed_start_range, &ranges.0) {
-                        // TODO
-                    }
-                    else {
-                        println!("Not at all");
+//                        println!("seed_start_range encompasses range");
+                        seed_target_ranges.push_back(Range{start: ranges.1.start,
+                            end: ranges.1.end});
+                        seed_start_ranges.push_back(Range{start: ranges.0.end, end: seed_start_range.end});
+                        seed_start_range.end = ranges.0.start;
                     }
                 }
                 if !seed_start_range.is_empty() {
                     seed_target_ranges.push_back(seed_start_range);
                 }
             }
-            seed_start_ranges = seed_target_ranges.clone();     // Is this a shallow copy...?
-            seed_target_ranges.clear();                 // Does this affect seed_start_ranges?
-            println!("target start after {:?}", seed_start_ranges);
+            seed_start_ranges = seed_target_ranges.clone();
+            seed_target_ranges.clear();
         }
-        for target in seed_target_ranges {
+        for target in seed_start_ranges {
             if target.start < lowest_loc {
                 lowest_loc = target.start;
             }
