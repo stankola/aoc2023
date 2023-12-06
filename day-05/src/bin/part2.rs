@@ -58,85 +58,61 @@ fn part2(input: &str) -> String {
     }
     let mut lowest_loc = u64::MAX;
     for seed_range in seeds {
-//        println!("processing range {}-{}: {} values", seed_range.start, seed_range.end, seed_range.end - seed_range.start);
-        let mut seed_start_ranges:VecDeque<Range<u64>> = VecDeque::new();
-        let mut seed_target_ranges:VecDeque<Range<u64>> = VecDeque::new();
-        seed_start_ranges.push_back(seed_range);
+        let mut start_queue:VecDeque<Range<u64>> = VecDeque::new();
+        let mut target_queue:VecDeque<Range<u64>> = VecDeque::new();
+        start_queue.push_back(seed_range);
 
         for map in &maps {
-//            println!("seed_start_ranges @ loopstart {:?}", seed_start_ranges);
-            while !seed_start_ranges.is_empty() {
-                let mut seed_start_range = seed_start_ranges.pop_front().unwrap();
-//                println!("processing queue {}-{}: {} values", seed_start_range.start, seed_start_range.end, seed_start_range.end - seed_start_range.start);
-                for ranges in map {
-//                    println!("Ranges {}-{} fits in {}-{}", seed_start_range.start, seed_start_range.end, ranges.0.start, ranges.0.end);
-                    if ranges.0.contains(&seed_start_range.start) {
-                        if ranges.0.contains(&(seed_start_range.end - 1)) {
-//                            println!("Perfectly");
-                            let len = seed_start_range.end - seed_start_range.start;
-                            let offset = seed_start_range.start - ranges.0.start;
-                            seed_target_ranges.push_back(Range{ start: ranges.1.start + offset,
-                                                                end: ranges.1.start + offset + len});
-                            seed_start_range.start = 0;
-                            seed_start_range.end = 0;
-                            break;
+            'start_loop: while !start_queue.is_empty() {
+                let mut input_seeds = start_queue.pop_front().unwrap();
+                for filter in map {
+                    if filter.0.contains(&input_seeds.start) {
+                        if filter.0.contains(&(input_seeds.end - 1)) {
+                            // Seed range fits completely inside the map range
+                            let len = input_seeds.end - input_seeds.start;
+                            let offset = input_seeds.start - filter.0.start;
+                            target_queue.push_back(Range{   start: filter.1.start + offset,
+                                                            end: filter.1.start + offset + len});
+                            break 'start_loop;
                         }
                         else {
-//                            println!("Range start fits, end does not");
-                            let len = ranges.0.end - seed_start_range.start;
-                            let offset = seed_start_range.start - ranges.0.start;
-                            seed_target_ranges.push_back(Range{start: ranges.1.start + offset,
-                                end: ranges.1.start + offset + len});
-                            seed_start_range.start = seed_start_range.start + len;
+                            // Start of seed range fits inside the map range
+                            let len = filter.0.end - input_seeds.start;
+                            let offset = input_seeds.start - filter.0.start;
+                            target_queue.push_back(Range{   start: filter.1.start + offset,
+                                                            end: filter.1.start + offset + len});
+                            input_seeds.start = input_seeds.start + len;
                         }
                     }
-                    else if ranges.0.contains(&(seed_start_range.end - 1)){
-//                        println!("Range end fits, start does not");
-                        let len = seed_start_range.end - ranges.0.start;
-                        seed_target_ranges.push_back(Range{start: ranges.1.start,
-                            end: ranges.1.start + len});
-                        seed_start_range.end = seed_start_range.end - len;
+                    else if filter.0.contains(&(input_seeds.end - 1)){
+                        // End of seed range fits inside the map range
+                        let len = input_seeds.end - filter.0.start;
+                        target_queue.push_back(Range{   start: filter.1.start,
+                                                        end: filter.1.start + len});
+                        input_seeds.end = input_seeds.end - len;
                     }
-                    else if range_contains_range(&seed_start_range, &ranges.0) {
-//                        println!("seed_start_range encompasses range");
-                        seed_target_ranges.push_back(Range{start: ranges.1.start,
-                            end: ranges.1.end});
-                        seed_start_ranges.push_back(Range{start: ranges.0.end, end: seed_start_range.end});
-                        seed_start_range.end = ranges.0.start;
+                    else if range_contains_range(&input_seeds, &filter.0) {
+                        // The map range is between the start and end of seed range
+                        target_queue.push_back(Range{   start: filter.1.start,
+                                                        end: filter.1.end});
+                        start_queue.push_back(Range{start: filter.0.end,
+                                                    end: input_seeds.end});
+                        input_seeds.end = filter.0.start;
                     }
                 }
-                if !seed_start_range.is_empty() {
-                    seed_target_ranges.push_back(seed_start_range);
-                }
+                // If no mapping was found for some groups of seeds, move them forward as they are, as per subject
+                target_queue.push_back(input_seeds);
             }
-            seed_start_ranges = seed_target_ranges.clone();
-            seed_target_ranges.clear();
+            // Make target_queue the start_queue for the next set of filters
+            start_queue = target_queue.clone();
+            target_queue.clear();
         }
-        for target in seed_start_ranges {
+        for target in start_queue {
             if target.start < lowest_loc {
                 lowest_loc = target.start;
             }
         }
-   }
-
-/* // Unoptimized:
-   for seed_range in seeds {
-   println!("processing range {}-{}: {} values", seed_range.start, seed_range.end, seed_range.end - seed_range.start);
-        for seed in seed_range {
-            let mut loc = seed;
-            for map in &maps {
-                for ranges in map {
-                    if ranges.0.contains(&loc) {
-                        loc = ranges.1.start + loc - ranges.0.start;
-                        break;
-                    }
-                }
-            }
-            lowest_loc = if loc < lowest_loc {loc} else {lowest_loc};
-        }
     }
-*/
-
     lowest_loc.to_string()
 }
 
