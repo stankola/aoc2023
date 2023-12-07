@@ -57,20 +57,16 @@ impl Hand {
         card_counts.sort_by(|(count_a, card_a), (count_b, card_b)| 
             match count_b.cmp(count_a) {
                 Equal => return card_b.cmp(card_a),
-                o => return o
-        });
+                o => return o }
+        );
         for (i, count) in (&mut card_counts).iter().enumerate() {
-            if count.1 == Jack {
-                if count.0 != 5 {
-                    if i == 0 {
-                        card_counts[1].0 += count.0;
-                    }
-                    else {
-                        card_counts[0].0 += count.0;
-                    }
-                    card_counts.remove(i);
-                    break;
+            if count.0 != 5 && count.1 == Jack {
+                match i {
+                    0 => card_counts[1].0 += count.0,
+                    _ => card_counts[0].0 += count.0
                 }
+                card_counts.remove(i);
+                break;
             }
         }
         match card_counts[0].0 {
