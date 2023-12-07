@@ -8,8 +8,8 @@ fn main() {
     dbg!(output);
 }
 
- #[derive(Clone, Copy, Ord, PartialOrd, PartialEq, Eq, Debug)]
- enum Type {
+#[derive(Clone, Copy, Ord, PartialOrd, PartialEq, Eq, Debug)]
+enum Type {
     High = 0,
     Pair,
     Pairs,
@@ -17,10 +17,10 @@ fn main() {
     FullHouse,
     Fours,
     Fives
- }
+}
  
- #[derive(Clone, Copy, Ord, PartialOrd, PartialEq, Eq, Debug)]
- enum Card {
+#[derive(Clone, Copy, Ord, PartialOrd, PartialEq, Eq, Debug)]
+enum Card {
     Two = 2,
     Three,
     Four,
@@ -34,7 +34,7 @@ fn main() {
     Queen,
     King,
     Ace
- }
+}
 
 #[derive(Debug)]
 struct Hand {
