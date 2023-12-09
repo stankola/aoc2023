@@ -1,6 +1,6 @@
 fn main() {
     let test_input = include_str!("./input.txt");
-    let output = part1(test_input);
+    let output = part2(test_input);
     dbg!(output);
 }
 
@@ -16,10 +16,11 @@ fn extrapolate(sequence:&Vec<i64>) -> i64 {
     return sequence_2.last().unwrap() + extrapolate(&sequence_2);
 }
 
-fn part1(input: &str) -> String {
+fn part2(input: &str) -> String {
     let mut collator = 0;
     for line in input.lines() {
-        let seq:Vec<i64> = line.split_whitespace().map(|s| s.parse::<i64>().unwrap()).collect();
+        let mut seq:Vec<i64> = line.split_whitespace().map(|s| s.parse::<i64>().unwrap()).collect();
+		seq.reverse();
         collator += seq.last().unwrap() + extrapolate(&seq);
     }
     collator.to_string()
@@ -31,7 +32,7 @@ mod tests {
 
     #[test]
     fn test_test() {
-        let result = part1(include_str!("./test_input.txt"));
-        assert_eq!(result, "114");
+        let result = part2(include_str!("./test_input.txt"));
+        assert_eq!(result, "2");
     }
 }
